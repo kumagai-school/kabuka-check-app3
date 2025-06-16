@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import math
 
 # APIのURL（Quick Tunnelなどで外部公開されているFlaskアプリのURL）
-API_BASE_URL = "https://demonstrated-differ-adams-foster.trycloudflare.com"  # ←ここを実際のURLに書き換えてください
+API_BASE_URL = "https://version-deleted-females-comfortable.trycloudflare.com/"  # ←ここを実際のURLに書き換えてください
 
 st.set_page_config(page_title="ルール1 株価チェック", layout="centered")
 
