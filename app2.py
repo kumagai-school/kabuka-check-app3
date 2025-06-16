@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # CSVファイルのパス（ローカル or 外部URLに変更可能）
-CSV_FILE = "RealData.csv"  # または "https://example.com/RealData.csv"
+API_URL = "https://demonstrated-differ-adams-foster.trycloudflare.com/api/price?code="
 
 st.set_page_config(page_title="Tower株価チェックAPP", layout="centered")
 st.title("📈 Tower株価チェック（仮設置）")
