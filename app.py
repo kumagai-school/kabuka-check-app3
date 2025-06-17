@@ -93,9 +93,9 @@ if code:
                 import plotly.graph_objects as go
 
                 df = pd.DataFrame(chart_data)
-                df["date"] = pd.to_datetime(df["date"])
+                df["date"] = pd.to_datetime(df["date"], errors="coerce")
                 # チャート用データフレーム作成後に追加
-                df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
+                df["date"] = df["date"].dt.strftime("%Y-%m-%d")
 
 
                 df["hovertext"] = (
