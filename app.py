@@ -25,7 +25,7 @@ st.title("📈 株価チェック（過去2週間＆チャート）")
 # --------------------------
 code = st.text_input("銘柄コードを入力してください（例：7203）", value="7203")
 
-if st.button("データ取得"):
+if st.button("チャート表示"):
     if not code.strip():
         st.warning("銘柄コードを入力してください。")
     else:
@@ -38,11 +38,6 @@ if st.button("データ取得"):
                 if "error" in data:
                     st.error(data["error"])
                 else:
-                    st.success("✅ 高値・安値を取得しました")
-                    st.write(f"**銘柄コード：** {data['code']}")
-                    st.write(f"**高値：** {data['high']}（{data['high_date']}）")
-                    st.write(f"**安値：** {data['low']}（{data['low_date']}）")
-
                     # ✅ ローソク足チャート取得
                     chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
                     chart_data = chart_resp.json().get("data", [])
