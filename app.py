@@ -80,11 +80,9 @@ if code:
 
 # すでに高値・安値を取得した後（high_dateやlow_dateを表示した直後）にこのブロックを追記
 
-    if st.button("チャートを表示する"):
-
-        import pandas as pd
-        import plotly.graph_objects as go
-
+if st.button("チャートを表示する"):
+    try:
+        # APIからチャートデータを取得
         candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
         resp = requests.get(candle_url, params={"code": code})
         chart_data = resp.json().get("data", [])
@@ -92,9 +90,12 @@ if code:
         if not chart_data:
             st.warning("チャートデータが取得できませんでした。")
         else:
+            import pandas as pd
+            import plotly.graph_objects as go
+
             df = pd.DataFrame(chart_data)
             df["date"] = pd.to_datetime(df["date"], errors="coerce")
-            df["date"] = df["date"].dt.strftime("%Y-%m-%d")
+            df["date_str"] = df["date"].dt.strftime("%Y-%m-%d")
 
             df["hovertext"] = (
                 "日付: " + df["date_str"] + "<br>" +
@@ -117,11 +118,12 @@ if code:
                     hoverinfo="text"
                 )
             ])
+
             fig.update_layout(
-                title=f"{company_name} の過去2週間チャート",
+                title=f"{data.get('name', '')} の2週間ローソク足チャート",
                 xaxis_title="日付",
                 yaxis_title="株価",
-                xaxis_rangeslider_visible=False,
+                xaxis_rangeslider_visible=False
                 xaxis=dict(
                     type='category'  # ← これがポイント！営業日のみを表示
                 )
