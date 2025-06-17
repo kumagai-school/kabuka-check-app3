@@ -114,7 +114,7 @@ if code:
                         close=df['close'],
                         increasing_line_color='red',
                         decreasing_line_color='blue',
-                        text=df["hovertext"],
+                        hovertext=df['hovertext'],
                         hoverinfo="text"
                     )
                 ])
