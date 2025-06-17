@@ -1,13 +1,9 @@
-import mplfinance as mpf
-import matplotlib.pyplot as plt
-import pandas as pd
-import requests
 import streamlit as st
-from io import BytesIO
-
+import requests
+import math
 
 # 外部APIのURL（Cloudflare Tunnel 経由）
-API_URL = "https://mostly-finance-population-lb.trycloudflare.com"
+API_URL = "https://mostly-finance-population-lb.trycloudflare.com/api/highlow"
 
 # ページ設定
 st.set_page_config(page_title="ルール1 株価チェック", layout="centered")
