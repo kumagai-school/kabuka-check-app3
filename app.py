@@ -1,6 +1,13 @@
 import streamlit as st
 import requests
 import math
+import mplfinance as mpf
+import matplotlib.pyplot as plt
+import pandas as pd
+import requests
+import streamlit as st
+from io import BytesIO
+
 
 # 外部APIのURL（Cloudflare Tunnel 経由）
 API_URL = "https://mostly-finance-population-lb.trycloudflare.com/api/highlow"
@@ -40,6 +47,30 @@ st.markdown("---")
 
 st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
 code = st.text_input("企業コード（半角英数字のみ、例: 7203）", "7203")
+
+# 🔽 ローソク足チャート描画
+st.subheader("📈 日足ローソク足チャート")
+
+candle_url = f"http://localhost:5000/api/candle?code={code}"
+
+try:
+    resp = requests.get(candle_url)
+    data = resp.json().get("data", [])
+
+    if not data:
+        st.warning("ローソク足チャートの取得に失敗しました。")
+    else:
+        df = pd.DataFrame(data)
+        df["date"] = pd.to_datetime(df["date"], format="%Y%m%d")
+        df.set_index("date", inplace=True)
+        df = df.astype(float)
+
+        fig, ax = plt.subplots()
+        mpf.plot(df, type='candle', style='charles', ax=ax, ylabel='価格', title=f"{code} の日足チャート（過去2週間）")
+        st.pyplot(fig)
+
+except Exception as e:
+    st.error(f"チャート表示エラー: {str(e)}")
 
 recent_high = None
 recent_low = None
