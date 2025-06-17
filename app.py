@@ -65,9 +65,22 @@ try:
         df.set_index("date", inplace=True)
         df = df.astype(float)
 
-        fig, ax = plt.subplots()
-        mpf.plot(df, type='candle', style='charles', ax=ax, ylabel='価格', title=f"{code} の日足チャート（過去2週間）")
-        st.pyplot(fig)
+fig = mpf.plot(
+    df,
+    type='candle',
+    style='charles',
+    title='',
+    ylabel='株価',
+    volume=False,
+    returnfig=True
+)
+
+if fig:
+    fig.suptitle(f"{code} の日足チャート", fontsize=14)
+    st.pyplot(fig)
+else:
+    st.error("チャート描画に失敗しました。")
+
 
 except Exception as e:
     st.error(f"チャート表示エラー: {str(e)}")
