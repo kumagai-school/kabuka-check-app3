@@ -105,13 +105,15 @@ if code:
                         close=df['close'],
                         increasing_line_color='red',
                         decreasing_line_color='blue',
-                        hovertemplate=
-                            '日付: %{x}<br>' +
-                            '始値: %{open}<br>' +
-                            '高値: %{high}<br>' +
-                            '安値: %{low}<br>' +
-                            '終値: %{close}<br>' +
-                            '<extra></extra>'
+                        customdata=df[["open", "high", "low", "close"]],
+                        hovertemplate=(
+                            "日付: %{x}<br>" +
+                            "始値: %{customdata[0]}<br>" +
+                            "高値: %{customdata[1]}<br>" +
+                            "安値: %{customdata[2]}<br>" +
+                            "終値: %{customdata[3]}<br>" +
+                            "<extra></extra>"
+                        )
                     )
                 ])
                 fig.update_layout(
