@@ -3,4 +3,4 @@ pandas
 requests
 matplotlib
 mplfinance
-plotly
+plotly>=5.0.0
