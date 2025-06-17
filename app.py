@@ -24,6 +24,19 @@ st.markdown("""
     </h1>
 """, unsafe_allow_html=True)
 st.markdown("---")
+st.markdown("<h4>📌 <strong>注意事項</strong></h4>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='color:red; font-size:14px;'>
+<ul>
+  <li>このアプリは東京証券取引所（.T）上場企業のみに対応しています。</li>
+  <li>平日朝8時45分～9時頃にメンテナンスが入ることがございます。</li>
+  <li>ゴールデンウィークなどの連休・イレギュラーな日程には正確に対応できない場合があります。</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
 
 st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
 code = st.text_input("企業コード（半角英数字のみ、例: 7203）", "7203")
@@ -93,3 +106,54 @@ if recent_high and recent_low:
             st.warning("高値＞安値 の数値を正しく入力してください。")
 
 st.markdown("---")
+st.markdown("<h4>📌 <strong>注意事項</strong></h4>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='color:red; font-size:14px;'>
+<ul>
+  <li>このアプリは東京証券取引所（.T）上場企業のみに対応しています。</li>
+  <li>平日朝8時45分～9時頃にメンテナンスが入ることがございます。</li>
+  <li>ゴールデンウィークなどの連休・イレギュラーな日程には正確に対応できない場合があります。</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
+
+import io
+import matplotlib.pyplot as plt
+import mplfinance as mpf
+import pandas as pd
+
+CANDLE_API_URL = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
+
+if code:
+    try:
+        candle_response = requests.get(CANDLE_API_URL, params={"code": code})
+        if candle_response.status_code == 200:
+            df_candle = pd.DataFrame(candle_response.json())
+
+            # 日付を datetime に変換
+            df_candle["date"] = pd.to_datetime(df_candle["date"], format="%Y%m%d")
+            df_candle.set_index("date", inplace=True)
+
+            # 株価のカラムを float に変換
+            df_candle = df_candle.astype({
+                "open": float,
+                "high": float,
+                "low": float,
+                "close": float
+            })
+
+            st.markdown("### 📈 株価ローソク足チャート（直近2週間）")
+            fig, ax = plt.subplots()
+            mpf.plot(df_candle, type='candle', ax=ax, style='yahoo', volume=False)
+            st.pyplot(fig)
+
+        else:
+            st.warning("ローソク足チャートの取得に失敗しました")
+
+    except Exception as e:
+        st.error(f"チャート表示中にエラーが発生しました: {e}")
+
+
