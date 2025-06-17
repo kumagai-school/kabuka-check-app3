@@ -81,7 +81,10 @@ if code:
 # すでに高値・安値を取得した後（high_dateやlow_dateを表示した直後）にこのブロックを追記
 
     if st.button("チャートを表示する"):
-        try:
+
+        import pandas as pd
+        import plotly.graph_objects as go
+
             candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
             resp = requests.get(candle_url, params={"code": code})
             chart_data = resp.json().get("data", [])
@@ -89,9 +92,6 @@ if code:
             if not chart_data:
                 st.warning("チャートデータが取得できませんでした。")
             else:
-                import pandas as pd
-                import plotly.graph_objects as go
-
                 df = pd.DataFrame(chart_data)
                 df["date"] = pd.to_datetime(df["date"], errors="coerce")
                 df["date"] = df["date"].dt.strftime("%Y-%m-%d")
