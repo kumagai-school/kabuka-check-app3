@@ -94,7 +94,9 @@ if code:
 
                 df = pd.DataFrame(chart_data)
                 df["date"] = pd.to_datetime(df["date"])
-                df["formatted_date"] = df["date"].dt.strftime('%Y-%m-%d')
+                # チャート用データフレーム作成後に追加
+                df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
+
 
                 df["hovertext"] = (
                     "日付: " + df["date"].dt.strftime("%Y-%m-%d") + "<br>" +
