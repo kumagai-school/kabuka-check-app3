@@ -97,6 +97,9 @@ if code:
                     xaxis_title="日付",
                     yaxis_title="株価",
                     xaxis_rangeslider_visible=False
+                    xaxis=dict(
+                        type='category'  # ← これがポイント！営業日のみを表示
+                    )
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
