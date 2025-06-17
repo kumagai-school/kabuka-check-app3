@@ -3,10 +3,10 @@ import requests
 import math
 import mplfinance as mpf
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import pandas as pd
 import requests
 import streamlit as st
-import plotly.graph_objects as go
 from io import BytesIO
 
 # --------------------------
@@ -48,23 +48,30 @@ if st.button("データ取得"):
             # チャート API 呼び出し
             try:
                 chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
-                chart_data = chart_resp.json()
-
-                if "error" in chart_data:
+                chart_data = chart_resp.json().get("data", [])
+            
+                if not chart_data:
                     st.warning("ローソク足チャートの取得に失敗しました。")
                 else:
-                    df = pd.DataFrame(chart_data["data"])
+                    df = pd.DataFrame(chart_data)
+                    df["date"] = pd.to_datetime(df["date"])
                     fig = go.Figure(data=[
-                        go.Candlestick(x=df['date'],
-                                       open=df['open'],
-                                       high=df['high'],
-                                       low=df['low'],
-                                       close=df['close'])
+                        go.Candlestick(
+                            x=df['date'],
+                            open=df['open'],
+                            high=df['high'],
+                            low=df['low'],
+                            close=df['close'],
+                            increasing_line_color="red",
+                            decreasing_line_color="blue"
+                        )
                     ])
-                    fig.update_layout(title=f"{data.get('name', '')}の2週間ローソク足チャート",
-                                      xaxis_title="日付",
-                                      yaxis_title="株価",
-                                      xaxis_rangeslider_visible=False)
+                    fig.update_layout(
+                        title=f"{data.get('name', '')} の2週間ローソク足チャート",
+                        xaxis_title="日付",
+                        yaxis_title="株価",
+                        xaxis_rangeslider_visible=False
+                    )
                     st.plotly_chart(fig, use_container_width=True)
             except Exception as e:
                 st.error(f"チャートデータ取得エラー: {e}")
