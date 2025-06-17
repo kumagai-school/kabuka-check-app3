@@ -30,24 +30,8 @@ if st.button("データ取得"):
         st.warning("銘柄コードを入力してください。")
     else:
         with st.spinner("データを取得中..."):
-            # 高値・安値 API 呼び出し
             try:
-                resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
-                data = resp.json()
-
-                if "error" in data:
-                    st.error(data["error"])
-                else:
-                    st.success("✅ 高値・安値を取得しました")
-                    st.write(f"**銘柄コード：** {data['code']}")
-                    st.write(f"**高値：** {data['high']}（{data['high_date']}）")
-                    st.write(f"**安値：** {data['low']}（{data['low_date']}）")
-            except Exception as e:
-                st.error(f"高値・安値データ取得に失敗しました: {e}")
-
-            # チャート API 呼び出し
-           try:
-                # ✅ 1回だけ呼び出す
+                # ✅ 高値・安値データ取得
                 resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
                 data = resp.json()
 
@@ -59,7 +43,7 @@ if st.button("データ取得"):
                     st.write(f"**高値：** {data['high']}（{data['high_date']}）")
                     st.write(f"**安値：** {data['low']}（{data['low_date']}）")
 
-                    # チャートもここで取得（if の中に含める）
+                    # ✅ ローソク足チャート取得
                     chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
                     chart_data = chart_resp.json().get("data", [])
 
