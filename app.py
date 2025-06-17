@@ -1,47 +1,38 @@
 import streamlit as st
 import requests
-import math
-import mplfinance as mpf
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 import pandas as pd
-import requests
-import streamlit as st
-from io import BytesIO
+import plotly.graph_objects as go
 
-# --------------------------
-# 設定
-# --------------------------
 API_URL = "https://mostly-finance-population-lb.trycloudflare.com"
 
-# --------------------------
-# ヘッダー
-# --------------------------
 st.set_page_config(page_title="株価チェックアプリ", layout="centered")
 st.title("📈 株価チェック（過去2週間＆チャート）")
 
-# --------------------------
-# ユーザー入力
-# --------------------------
 code = st.text_input("銘柄コードを入力してください（例：7203）", value="7203")
 
-if st.button("チャート表示"):
+show_chart = False  # チャート表示フラグ
+
+if st.button("データ取得"):
     if not code.strip():
         st.warning("銘柄コードを入力してください。")
     else:
-        with st.spinner("データを取得中..."):
-            try:
-                # ✅ 高値・安値データ取得
-                resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
-                data = resp.json()
+        try:
+            resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
+            data = resp.json()
 
-                if "error" in data:
-                    st.error(data["error"])
-                else:
-                    # ✅ ローソク足チャート取得
+            if "error" in data:
+                st.error(data["error"])
+            else:
+                st.success("✅ 高値・安値を取得しました")
+                st.write(f"**銘柄コード：** {data['code']}")
+                st.write(f"**高値：** {data['high']}（{data['high_date']}）")
+                st.write(f"**安値：** {data['low']}（{data['low_date']}）")
+
+                # チャート表示ボタン
+                if st.button("チャート表示"):
                     chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
                     chart_data = chart_resp.json().get("data", [])
-
+                    
                     if not chart_data:
                         st.warning("ローソク足チャートの取得に失敗しました。")
                     else:
@@ -65,45 +56,9 @@ if st.button("チャート表示"):
                             xaxis_rangeslider_visible=False
                         )
                         st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.error(f"データ取得中にエラーが発生しました: {e}")
 
-            except Exception as e:
-                st.error(f"データ取得中にエラーが発生しました: {e}")
-
-recent_high = None
-recent_low = None
-
-def green_box(label, value, unit):
-    st.markdown(f"""
-        <div style="
-            background-color: #f0fdf4;
-            border-left: 4px solid #4CAF50;
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;">
-            ✅ <strong>{label}：</strong><br>
-            <span style="font-size:24px; font-weight:bold;">{value} {unit}</span>
-        </div>
-    """, unsafe_allow_html=True)
-
-if code:
-    try:
-        response = requests.get(API_URL, params={"code": code})
-        if response.status_code == 200:
-            data = response.json()
-            company_name = data.get("name", "企業名不明")
-            recent_high = data["high"]
-            high_date = data["high_date"]
-            recent_low = data["low"]
-            low_date = data["low_date"]
-
-            st.subheader(f"{company_name}（{code}）の株価情報")
-            st.markdown(f"✅ **直近5営業日の高値**:<br><span style='font-size:24px'>{recent_high:.2f} 円（{high_date}）</span>", unsafe_allow_html=True)
-            st.markdown(f"✅ **高値日から過去2週間以内の安値**:<br><span style='font-size:24px'>{recent_low:.2f} 円（{low_date}）</span>", unsafe_allow_html=True)
-
-        else:
-            st.error(f"APIエラー: {response.status_code} - {response.text}")
-    except Exception as e:
-        st.error(f"データ取得中にエラーが発生しました: {e}")
 
 st.markdown("---")
 
