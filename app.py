@@ -94,6 +94,7 @@ if code:
 
                 df = pd.DataFrame(chart_data)
                 df["date"] = pd.to_datetime(df["date"])
+                df["formatted_date"] = df["date"].dt.strftime('%Y-%m-%d')
 
                 fig = go.Figure(data=[
                     go.Candlestick(
@@ -104,6 +105,13 @@ if code:
                         close=df['close'],
                         increasing_line_color='red',
                         decreasing_line_color='blue'
+                        hovertemplate=
+                            '日付: %{x}<br>' +
+                            '始値: %{open}<br>' +
+                            '高値: %{high}<br>' +
+                            '安値: %{low}<br>' +
+                            '終値: %{close}<br>' +
+                            '<extra></extra>'
                     )
                 ])
                 fig.update_layout(
