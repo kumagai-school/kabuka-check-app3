@@ -96,6 +96,14 @@ if code:
                 df["date"] = pd.to_datetime(df["date"])
                 df["formatted_date"] = df["date"].dt.strftime('%Y-%m-%d')
 
+                df["hovertext"] = (
+                    "日付: " + df["date"].dt.strftime("%Y-%m-%d") + "<br>" +
+                    "始値: " + df["open"].astype(str) + "<br>" +
+                    "高値: " + df["high"].astype(str) + "<br>" +
+                    "安値: " + df["low"].astype(str) + "<br>" +
+                    "終値: " + df["close"].astype(str)
+                )
+
                 fig = go.Figure(data=[
                     go.Candlestick(
                         x=df['date'],
@@ -105,15 +113,8 @@ if code:
                         close=df['close'],
                         increasing_line_color='red',
                         decreasing_line_color='blue',
-                        customdata=df[["open", "high", "low", "close"]],
-                        hovertemplate=(
-                            "日付: %{x}<br>" +
-                            "始値: %{customdata[0]}<br>" +
-                            "高値: %{customdata[1]}<br>" +
-                            "安値: %{customdata[2]}<br>" +
-                            "終値: %{customdata[3]}<br>" +
-                            "<extra></extra>"
-                        )
+                        text=df["hovertext"],
+                        hoverinfo="text"
                     )
                 ])
                 fig.update_layout(
