@@ -51,7 +51,7 @@ code = st.text_input("企業コード（半角英数字のみ、例: 7203）", "
 # 🔽 ローソク足チャート描画
 st.subheader("📈 日足ローソク足チャート")
 
-candle_url = f"http://localhost:5000/api/candle?code={code}"
+candle_url = f"https://mostly-finance-population-lb.trycloudflare.com/api/candle?code={code}"
 
 try:
     resp = requests.get(candle_url)
