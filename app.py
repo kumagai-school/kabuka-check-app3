@@ -46,35 +46,49 @@ if st.button("データ取得"):
                 st.error(f"高値・安値データ取得に失敗しました: {e}")
 
             # チャート API 呼び出し
-            try:
-                chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
-                chart_data = chart_resp.json().get("data", [])
-            
-                if not chart_data:
-                    st.warning("ローソク足チャートの取得に失敗しました。")
+           try:
+                # ✅ 1回だけ呼び出す
+                resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
+                data = resp.json()
+
+                if "error" in data:
+                    st.error(data["error"])
                 else:
-                    df = pd.DataFrame(chart_data)
-                    df["date"] = pd.to_datetime(df["date"])
-                    fig = go.Figure(data=[
-                        go.Candlestick(
-                            x=df['date'],
-                            open=df['open'],
-                            high=df['high'],
-                            low=df['low'],
-                            close=df['close'],
-                            increasing_line_color="red",
-                            decreasing_line_color="blue"
+                    st.success("✅ 高値・安値を取得しました")
+                    st.write(f"**銘柄コード：** {data['code']}")
+                    st.write(f"**高値：** {data['high']}（{data['high_date']}）")
+                    st.write(f"**安値：** {data['low']}（{data['low_date']}）")
+
+                    # チャートもここで取得（if の中に含める）
+                    chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
+                    chart_data = chart_resp.json().get("data", [])
+
+                    if not chart_data:
+                        st.warning("ローソク足チャートの取得に失敗しました。")
+                    else:
+                        df = pd.DataFrame(chart_data)
+                        df["date"] = pd.to_datetime(df["date"])
+                        fig = go.Figure(data=[
+                            go.Candlestick(
+                                x=df['date'],
+                                open=df['open'],
+                                high=df['high'],
+                                low=df['low'],
+                                close=df['close'],
+                                increasing_line_color="red",
+                                decreasing_line_color="blue"
+                            )
+                        ])
+                        fig.update_layout(
+                            title=f"{data.get('name', '')} の2週間ローソク足チャート",
+                            xaxis_title="日付",
+                            yaxis_title="株価",
+                            xaxis_rangeslider_visible=False
                         )
-                    ])
-                    fig.update_layout(
-                        title=f"{data.get('name', '')} の2週間ローソク足チャート",
-                        xaxis_title="日付",
-                        yaxis_title="株価",
-                        xaxis_rangeslider_visible=False
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, use_container_width=True)
+
             except Exception as e:
-                st.error(f"チャートデータ取得エラー: {e}")
+                st.error(f"データ取得中にエラーが発生しました: {e}")
 
 recent_high = None
 recent_low = None
