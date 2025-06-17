@@ -123,7 +123,7 @@ if st.button("チャートを表示する"):
                 title=f"{data.get('name', '')} の2週間ローソク足チャート",
                 xaxis_title="日付",
                 yaxis_title="株価",
-                xaxis_rangeslider_visible=False
+                xaxis_rangeslider_visible=False,
                 xaxis=dict(
                     type='category'  # ← これがポイント！営業日のみを表示
                 )
