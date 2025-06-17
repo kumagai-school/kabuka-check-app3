@@ -98,7 +98,7 @@ if code:
 
 
                 df["hovertext"] = (
-                    "日付: " + df["date"].dt.strftime("%Y-%m-%d") + "<br>" +
+                    "日付: " + df["date_str"] + "<br>" +
                     "始値: " + df["open"].astype(str) + "<br>" +
                     "高値: " + df["high"].astype(str) + "<br>" +
                     "安値: " + df["low"].astype(str) + "<br>" +
