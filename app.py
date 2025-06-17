@@ -23,6 +23,20 @@ st.markdown("""
         『ルール1』<br>株価チェックアプリ
     </h1>
 """, unsafe_allow_html=True)
+
+st.markdown("---")
+st.markdown("<h4>📌 <strong>注意事項</strong></h4>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='color:red; font-size:14px;'>
+<ul>
+  <li>このアプリは東京証券取引所（.T）上場企業のみに対応しています。</li>
+  <li>平日8時30分～9時に5分程度のメンテナンスが入ることがあります。</li>
+  <li>ゴールデンウィークなどの連休・イレギュラーな日程には正確に対応できない場合があります。</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown("---")
 
 st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
@@ -106,6 +120,18 @@ if code:
         except Exception as e:
             st.error(f"チャート取得中にエラーが発生しました: {e}")
 
+
+st.markdown("---")
+st.markdown("<h4>📌 <strong>注意事項</strong></h4>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='color:red; font-size:14px;'>
+<ul>
+  <li>チャートは当日分は反映しておりません。
+  <li>ゴールデンウィークなどの連休・イレギュラーな日程には正確に対応できない場合があります。</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 
