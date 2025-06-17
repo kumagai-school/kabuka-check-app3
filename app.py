@@ -64,6 +64,46 @@ if code:
     except Exception as e:
         st.error(f"データ取得中にエラーが発生しました: {e}")
 
+# すでに高値・安値を取得した後（high_dateやlow_dateを表示した直後）にこのブロックを追記
+
+    if st.button("チャートを表示する"):
+        try:
+            candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
+            resp = requests.get(candle_url, params={"code": code})
+            chart_data = resp.json().get("data", [])
+
+            if not chart_data:
+                st.warning("チャートデータが取得できませんでした。")
+            else:
+                import pandas as pd
+                import plotly.graph_objects as go
+
+                df = pd.DataFrame(chart_data)
+                df["date"] = pd.to_datetime(df["date"])
+
+                fig = go.Figure(data=[
+                    go.Candlestick(
+                        x=df['date'],
+                        open=df['open'],
+                        high=df['high'],
+                        low=df['low'],
+                        close=df['close'],
+                        increasing_line_color='red',
+                        decreasing_line_color='blue'
+                    )
+                ])
+                fig.update_layout(
+                    title=f"{company_name} の過去2週間チャート",
+                    xaxis_title="日付",
+                    yaxis_title="株価",
+                    xaxis_rangeslider_visible=False
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"チャート取得中にエラーが発生しました: {e}")
+
+
 st.markdown("---")
 
 # 計算ツール
