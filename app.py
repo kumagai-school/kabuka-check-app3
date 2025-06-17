@@ -104,7 +104,7 @@ if code:
                         low=df['low'],
                         close=df['close'],
                         increasing_line_color='red',
-                        decreasing_line_color='blue'
+                        decreasing_line_color='blue',
                         hovertemplate=
                             '日付: %{x}<br>' +
                             '始値: %{open}<br>' +
