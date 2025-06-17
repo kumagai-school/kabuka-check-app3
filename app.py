@@ -94,7 +94,6 @@ if code:
 
                 df = pd.DataFrame(chart_data)
                 df["date"] = pd.to_datetime(df["date"], errors="coerce")
-                # チャート用データフレーム作成後に追加
                 df["date"] = df["date"].dt.strftime("%Y-%m-%d")
 
 
