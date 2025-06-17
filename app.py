@@ -12,7 +12,7 @@ from io import BytesIO
 # --------------------------
 # 設定
 # --------------------------
-API_URL = "https://mostly-finance-population-lb.trycloudflare.com/api/highlow"
+API_URL = "https://mostly-finance-population-lb.trycloudflare.com"
 
 # --------------------------
 # ヘッダー
