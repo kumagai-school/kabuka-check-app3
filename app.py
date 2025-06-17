@@ -1,64 +1,97 @@
-import streamlit as st
-import requests
+import mplfinance as mpf
+import matplotlib.pyplot as plt
 import pandas as pd
-import plotly.graph_objects as go
+import requests
+import streamlit as st
+from io import BytesIO
 
+
+# 外部APIのURL（Cloudflare Tunnel 経由）
 API_URL = "https://mostly-finance-population-lb.trycloudflare.com"
 
-st.set_page_config(page_title="株価チェックアプリ", layout="centered")
-st.title("📈 株価チェック（過去2週間＆チャート）")
+# ページ設定
+st.set_page_config(page_title="ルール1 株価チェック", layout="centered")
 
-code = st.text_input("銘柄コードを入力してください（例：7203）", value="7203")
+# CSS（入力欄の文字拡大）
+st.markdown("""
+    <style>
+    input[type="number"], input[type="text"] {
+        font-size: 22px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-show_chart = False  # チャート表示フラグ
+# タイトル
+st.markdown("""
+    <h1 style='text-align:left; color:#2E86C1; font-size:26px; line-height:1.4em;'>
+        『ルール1』<br>株価チェックアプリ
+    </h1>
+""", unsafe_allow_html=True)
+st.markdown("---")
 
-if st.button("データ取得"):
-    if not code.strip():
-        st.warning("銘柄コードを入力してください。")
+st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
+code = st.text_input("企業コード（半角英数字のみ、例: 7203）", "7203")
+
+# 🔽 ローソク足チャート描画
+st.subheader("📈 日足ローソク足チャート")
+
+candle_url = f"https://mostly-finance-population-lb.trycloudflare.com/api/candle?code={code}"
+
+try:
+    resp = requests.get(candle_url)
+    data = resp.json().get("data", [])
+
+    if not data:
+        st.warning("ローソク足チャートの取得に失敗しました。")
     else:
-        try:
-            resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
-            data = resp.json()
+        df = pd.DataFrame(data)
+        df["date"] = pd.to_datetime(df["date"], format="%Y%m%d")
+        df.set_index("date", inplace=True)
+        df = df.astype(float)
 
-            if "error" in data:
-                st.error(data["error"])
-            else:
-                st.success("✅ 高値・安値を取得しました")
-                st.write(f"**銘柄コード：** {data['code']}")
-                st.write(f"**高値：** {data['high']}（{data['high_date']}）")
-                st.write(f"**安値：** {data['low']}（{data['low_date']}）")
+        fig, ax = plt.subplots()
+        mpf.plot(df, type='candle', style='charles', ax=ax, ylabel='価格', title=f"{code} の日足チャート（過去2週間）")
+        st.pyplot(fig)
 
-                # チャート表示ボタン
-                if st.button("チャート表示"):
-                    chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
-                    chart_data = chart_resp.json().get("data", [])
-                    
-                    if not chart_data:
-                        st.warning("ローソク足チャートの取得に失敗しました。")
-                    else:
-                        df = pd.DataFrame(chart_data)
-                        df["date"] = pd.to_datetime(df["date"])
-                        fig = go.Figure(data=[
-                            go.Candlestick(
-                                x=df['date'],
-                                open=df['open'],
-                                high=df['high'],
-                                low=df['low'],
-                                close=df['close'],
-                                increasing_line_color="red",
-                                decreasing_line_color="blue"
-                            )
-                        ])
-                        fig.update_layout(
-                            title=f"{data.get('name', '')} の2週間ローソク足チャート",
-                            xaxis_title="日付",
-                            yaxis_title="株価",
-                            xaxis_rangeslider_visible=False
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.error(f"データ取得中にエラーが発生しました: {e}")
+except Exception as e:
+    st.error(f"チャート表示エラー: {str(e)}")
 
+
+recent_high = None
+recent_low = None
+
+def green_box(label, value, unit):
+    st.markdown(f"""
+        <div style="
+            background-color: #f0fdf4;
+            border-left: 4px solid #4CAF50;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;">
+            ✅ <strong>{label}：</strong><br>
+            <span style="font-size:24px; font-weight:bold;">{value} {unit}</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+if code:
+    try:
+        response = requests.get(API_URL, params={"code": code})
+        if response.status_code == 200:
+            data = response.json()
+            company_name = data.get("name", "企業名不明")
+            recent_high = data["high"]
+            high_date = data["high_date"]
+            recent_low = data["low"]
+            low_date = data["low_date"]
+
+            st.subheader(f"{company_name}（{code}）の株価情報")
+            st.markdown(f"✅ **直近5営業日の高値**:<br><span style='font-size:24px'>{recent_high:.2f} 円（{high_date}）</span>", unsafe_allow_html=True)
+            st.markdown(f"✅ **高値日から過去2週間以内の安値**:<br><span style='font-size:24px'>{recent_low:.2f} 円（{low_date}）</span>", unsafe_allow_html=True)
+
+        else:
+            st.error(f"APIエラー: {response.status_code} - {response.text}")
+    except Exception as e:
+        st.error(f"データ取得中にエラーが発生しました: {e}")
 
 st.markdown("---")
 
@@ -89,16 +122,40 @@ if recent_high and recent_low:
             st.warning("高値＞安値 の数値を正しく入力してください。")
 
 st.markdown("---")
-st.markdown("<h4>📌 <strong>注意事項</strong></h4>", unsafe_allow_html=True)
 
-st.markdown("""
-<div style='color:red; font-size:14px;'>
-<ul>
-  <li>このアプリは東京証券取引所（.T）上場企業のみに対応しています。</li>
-  <li>平日朝8時45分～9時頃にメンテナンスが入ることがございます。</li>
-  <li>ゴールデンウィークなどの連休・イレギュラーな日程には正確に対応できない場合があります。</li>
-</ul>
-</div>
-""", unsafe_allow_html=True)
+import io
+import matplotlib.pyplot as plt
+import mplfinance as mpf
+import pandas as pd
 
-st.markdown("---")
+CANDLE_API_URL = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
+
+if code:
+    try:
+        candle_response = requests.get(CANDLE_API_URL, params={"code": code})
+        if candle_response.status_code == 200:
+            df_candle = pd.DataFrame(candle_response.json())
+
+            # 日付を datetime に変換
+            df_candle["date"] = pd.to_datetime(df_candle["date"], format="%Y%m%d")
+            df_candle.set_index("date", inplace=True)
+
+            # 株価のカラムを float に変換
+            df_candle = df_candle.astype({
+                "open": float,
+                "high": float,
+                "low": float,
+                "close": float
+            })
+
+            st.markdown("### 📈 株価ローソク足チャート（直近2週間）")
+            fig, ax = plt.subplots()
+            mpf.plot(df_candle, type='candle', ax=ax, style='yahoo', volume=False)
+            st.pyplot(fig)
+
+        else:
+            st.warning("ローソク足チャートの取得に失敗しました")
+
+    except Exception as e:
+        st.error(f"チャート表示中にエラーが発生しました: {e}")
+
