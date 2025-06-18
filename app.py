@@ -78,9 +78,54 @@ if code:
     except Exception as e:
         st.error(f"データ取得中にエラーが発生しました: {e}")
 
+if code.strip():  # 入力がある場合、自動で表示
+    with st.spinner("データを取得中..."):
+        try:
+            # 高値・安値の取得
+            resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
+            data = resp.json()
+
+            if "error" in data:
+                st.error(data["error"])
+            else:
+                st.success("✅ 高値・安値を取得しました")
+                st.write(f"**銘柄コード：** {data['code']}")
+                st.write(f"**高値：** {data['high']}（{data['high_date']}）")
+                st.write(f"**安値：** {data['low']}（{data['low_date']}）")
+
+                # チャートデータの取得と表示
+                chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
+                chart_data = chart_resp.json().get("data", [])
+
+                if not chart_data:
+                    st.warning("ローソク足チャートの取得に失敗しました。")
+                else:
+                    df = pd.DataFrame(chart_data)
+                    df["date_str"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
+
+                    fig = go.Figure(data=[go.Candlestick(
+                        x=df["date_str"],
+                        open=df["open"],
+                        high=df["high"],
+                        low=df["low"],
+                        close=df["close"],
+                        increasing_line_color='red',
+                        decreasing_line_color='blue'
+                    )])
+                    fig.update_layout(
+                        title=f"{data.get('name', '')} の2週間ローソク足チャート",
+                        xaxis_title="日付",
+                        yaxis_title="株価",
+                        xaxis_rangeslider_visible=False,
+                        xaxis=dict(type='category', tickangle=-45)
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.error(f"データ取得中にエラーが発生しました: {e}")
+
 # すでに高値・安値を取得した後（high_dateやlow_dateを表示した直後）にこのブロックを追記
 
-if st.button("チャートを表示する"):
+if st.button("チャート再取得する"):
     try:
         # APIからチャートデータを取得
         candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
