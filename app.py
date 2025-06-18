@@ -82,56 +82,56 @@ if code:
 if code.strip():  # 入力がある場合、自動で表示
     with st.spinner("データを取得中..."):
         try:
-        candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
-        resp = requests.get(candle_url, params={"code": code})
-        chart_data = resp.json().get("data", [])
+        　candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
+      　  resp = requests.get(candle_url, params={"code": code})
+      　  chart_data = resp.json().get("data", [])
 
-        if not chart_data:
-            st.warning("チャートデータが取得できませんでした。")
-        else:
-            import pandas as pd
-            import plotly.graph_objects as go
+      　  if not chart_data:
+        　    st.warning("チャートデータが取得できませんでした。")
+      　  else:
+        　    import pandas as pd
+          　  import plotly.graph_objects as go
 
-            df = pd.DataFrame(chart_data)
-            df["date"] = pd.to_datetime(df["date"], errors="coerce")
-            df["date_str"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
+　            df = pd.DataFrame(chart_data)
+  　          df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    　        df["date_str"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
 
-            df["hovertext"] = (
-                "日付: " + df["date_str"] + "<br>" +
-                "始値: " + df["open"].astype(str) + "<br>" +
-                "高値: " + df["high"].astype(str) + "<br>" +
-                "安値: " + df["low"].astype(str) + "<br>" +
-                "終値: " + df["close"].astype(str)
-            )
+      　      df["hovertext"] = (
+        　        "日付: " + df["date_str"] + "<br>" +
+          　      "始値: " + df["open"].astype(str) + "<br>" +
+            　    "高値: " + df["high"].astype(str) + "<br>" +
+              　  "安値: " + df["low"].astype(str) + "<br>" +
+               　 "終値: " + df["close"].astype(str)
+           　 )
 
-            fig = go.Figure(data=[
-                go.Candlestick(
-                    x=df["date_str"],
-                    open=df["open"],
-                    high=df["high"],
-                    low=df["low"],
-                    close=df["close"],
-                    increasing_line_color='red',
-                    decreasing_line_color='blue',
-                    hovertext=df["hovertext"],
-                    hoverinfo="text"
-                )
-            ])
+      　      fig = go.Figure(data=[
+       　         go.Candlestick(
+       　             x=df["date_str"],
+         　           open=df["open"],
+           　         high=df["high"],
+             　       low=df["low"],
+               　     close=df["close"],
+                 　   increasing_line_color='red',
+                   　 decreasing_line_color='blue',
+          　          hovertext=df["hovertext"],
+            　        hoverinfo="text"
+              　  )
+           　 ])
 
-            fig.update_layout(
-                title=f"{data.get('name', '')} の2週間ローソク足チャート",
-                xaxis_title="日付",
-                yaxis_title="株価",
-                xaxis_rangeslider_visible=False,
-                xaxis=dict(
-                    type='category',  # ← 営業日のみ詰めて表示
-                    tickangle=-45     # 日付が重なりにくくなります
-                )
-            )
-            st.plotly_chart(fig, use_container_width=True)
+         　   fig.update_layout(
+         　       title=f"{data.get('name', '')} の2週間ローソク足チャート",
+         　       xaxis_title="日付",
+         　       yaxis_title="株価",
+         　       xaxis_rangeslider_visible=False,
+            　    xaxis=dict(
+        　            type='category',  # ← 営業日のみ詰めて表示
+        　            tickangle=-45     # 日付が重なりにくくなります
+        　        )
+       　     )
+        　    st.plotly_chart(fig, use_container_width=True)
 
-    except Exception as e:
-        st.error(f"チャート取得中にエラーが発生しました: {e}")
+  　  except Exception as e:
+    　    st.error(f"チャート取得中にエラーが発生しました: {e}")
 
 
 # すでに高値・安値を取得した後（high_dateやlow_dateを表示した直後）にこのブロックを追記
