@@ -78,6 +78,18 @@ if code:
     except Exception as e:
         st.error(f"データ取得中にエラーが発生しました: {e}")
 
+st.markdown("---")
+st.markdown("<h4>📌 <strong>注意事項</strong></h4>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='color:red; font-size:14px;'>
+<ul>
+  <li>チャートは当日分は反映しておりません。
+</ul>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
 
 if code.strip():  # 入力がある場合、自動で表示
     with st.spinner("データを取得中..."):
@@ -132,18 +144,6 @@ if code.strip():  # 入力がある場合、自動で表示
 
         except Exception as e:
           st.error(f"チャート取得中にエラーが発生しました: {e}")
-
-st.markdown("---")
-st.markdown("<h4>📌 <strong>注意事項</strong></h4>", unsafe_allow_html=True)
-
-st.markdown("""
-<div style='color:red; font-size:14px;'>
-<ul>
-  <li>チャートは当日分は反映しておりません。
-  <li>ゴールデンウィークなどの連休・イレギュラーな日程には正確に対応できない場合があります。</li>
-</ul>
-</div>
-""", unsafe_allow_html=True)
 
 st.markdown("---")
 
