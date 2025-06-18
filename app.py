@@ -130,7 +130,7 @@ if code.strip():  # 入力がある場合、自動で表示
               )
               st.plotly_chart(fig, use_container_width=True)
 
-      except Exception as e:
+        except Exception as e:
           st.error(f"チャート取得中にエラーが発生しました: {e}")
 
 
