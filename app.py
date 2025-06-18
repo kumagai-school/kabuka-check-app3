@@ -95,7 +95,7 @@ if st.button("チャートを表示する"):
 
             df = pd.DataFrame(chart_data)
             df["date"] = pd.to_datetime(df["date"], errors="coerce")
-            df["date_str"] = df["date"].dt.strftime("%Y-%m-%d")
+            df["date_str"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
 
             df["hovertext"] = (
                 "日付: " + df["date_str"] + "<br>" +
@@ -107,14 +107,14 @@ if st.button("チャートを表示する"):
 
             fig = go.Figure(data=[
                 go.Candlestick(
-                    x=df['date'],
-                    open=df['open'],
-                    high=df['high'],
-                    low=df['low'],
-                    close=df['close'],
+                    x=df["date_str"],
+                    open=df["open"],
+                    high=df["high"],
+                    low=df["low"],
+                    close=df["close"],
                     increasing_line_color='red',
                     decreasing_line_color='blue',
-                    hovertext=df['hovertext'],
+                    hovertext=df["hovertext"],
                     hoverinfo="text"
                 )
             ])
@@ -124,9 +124,6 @@ if st.button("チャートを表示する"):
                 xaxis_title="日付",
                 yaxis_title="株価",
                 xaxis_rangeslider_visible=False,
-                xaxis=dict(
-                    tickformat="%Y-%m-%d"  # ← これがポイント！営業日のみを表示
-                )
                 xaxis=dict(
                     type='category',  # ← 営業日のみ詰めて表示
                     tickangle=-45     # 日付が重なりにくくなります
