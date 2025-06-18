@@ -128,7 +128,7 @@ if code.strip():  # 入力がある場合、自動で表示
                       tickangle=-45     # 日付が重なりにくくなります
                   )
               )
-              st.plotly_chart(fig, use_container_width=True, key="main_chart")
+              st.plotly_chart(fig, use_container_width=True, key="chart")
 
         except Exception as e:
           st.error(f"チャート取得中にエラーが発生しました: {e}")
@@ -185,7 +185,7 @@ if st.button("チャート再取得する"):
                     tickangle=-45     # 日付が重なりにくくなります
                 )
             )
-            st.plotly_chart(fig, use_container_width=True, key="retry_chart")
+            st.plotly_chart(fig, use_container_width=True, key="chart")
 
     except Exception as e:
         st.error(f"チャート取得中にエラーが発生しました: {e}")
