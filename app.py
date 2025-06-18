@@ -3,7 +3,7 @@ import requests
 import math
 
 # 外部APIのURL（Cloudflare Tunnel 経由）
-API_URL = "https://mostly-finance-population-lb.trycloudflare.com/api/highlow"
+HIGHLOW_API = "https://mostly-finance-population-lb.trycloudflare.com/api/highlow"
 
 # ページ設定
 st.set_page_config(page_title="ルール1 株価チェック", layout="centered")
@@ -60,7 +60,7 @@ def green_box(label, value, unit):
 
 if code:
     try:
-        response = requests.get(API_URL, params={"code": code})
+        response = requests.get(HIGHLOW_API, params={"code": code})
         if response.status_code == 200:
             data = response.json()
             company_name = data.get("name", "企業名不明")
@@ -82,47 +82,57 @@ if code:
 if code.strip():  # 入力がある場合、自動で表示
     with st.spinner("データを取得中..."):
         try:
-            # 高値・安値の取得
-            resp = requests.get(f"API_URL", params={"code": code})
-            data = resp.json()
+        candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
+        resp = requests.get(candle_url, params={"code": code})
+        chart_data = resp.json().get("data", [])
 
-            if "error" in data:
-                st.error(data["error"])
-            else:
-                st.success("✅ 高値・安値を取得しました")
-                st.write(f"**銘柄コード：** {data['code']}")
-                st.write(f"**高値：** {data['high']}（{data['high_date']}）")
-                st.write(f"**安値：** {data['low']}（{data['low_date']}）")
+        if not chart_data:
+            st.warning("チャートデータが取得できませんでした。")
+        else:
+            import pandas as pd
+            import plotly.graph_objects as go
 
-                # チャートデータの取得と表示
-                chart_resp = requests.get(f"API_URL", params={"code": code})
-                chart_data = chart_resp.json().get("data", [])
+            df = pd.DataFrame(chart_data)
+            df["date"] = pd.to_datetime(df["date"], errors="coerce")
+            df["date_str"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
 
-                if not chart_data:
-                    st.warning("ローソク足チャートの取得に失敗しました。")
-                else:
-                    df = pd.DataFrame(chart_data)
-                    df["date_str"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
+            df["hovertext"] = (
+                "日付: " + df["date_str"] + "<br>" +
+                "始値: " + df["open"].astype(str) + "<br>" +
+                "高値: " + df["high"].astype(str) + "<br>" +
+                "安値: " + df["low"].astype(str) + "<br>" +
+                "終値: " + df["close"].astype(str)
+            )
 
-                    fig = go.Figure(data=[go.Candlestick(
-                        x=df["date_str"],
-                        open=df["open"],
-                        high=df["high"],
-                        low=df["low"],
-                        close=df["close"],
-                        increasing_line_color='red',
-                        decreasing_line_color='blue'
-                    )])
-                    fig.update_layout(
-                        title=f"{data.get('name', '')} の2週間ローソク足チャート",
-                        xaxis_title="日付",
-                        yaxis_title="株価",
-                        xaxis_rangeslider_visible=False,
-                        xaxis=dict(type='category', tickangle=-45)
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.error(f"データ取得中にエラーが発生しました: {e}")
+            fig = go.Figure(data=[
+                go.Candlestick(
+                    x=df["date_str"],
+                    open=df["open"],
+                    high=df["high"],
+                    low=df["low"],
+                    close=df["close"],
+                    increasing_line_color='red',
+                    decreasing_line_color='blue',
+                    hovertext=df["hovertext"],
+                    hoverinfo="text"
+                )
+            ])
+
+            fig.update_layout(
+                title=f"{data.get('name', '')} の2週間ローソク足チャート",
+                xaxis_title="日付",
+                yaxis_title="株価",
+                xaxis_rangeslider_visible=False,
+                xaxis=dict(
+                    type='category',  # ← 営業日のみ詰めて表示
+                    tickangle=-45     # 日付が重なりにくくなります
+                )
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        st.error(f"チャート取得中にエラーが発生しました: {e}")
+
 
 # すでに高値・安値を取得した後（high_dateやlow_dateを表示した直後）にこのブロックを追記
 
