@@ -127,6 +127,10 @@ if st.button("チャートを表示する"):
                 xaxis=dict(
                     tickformat="%Y-%m-%d"  # ← これがポイント！営業日のみを表示
                 )
+                xaxis=dict(
+                    type='category',  # ← 営業日のみ詰めて表示
+                    tickangle=-45     # 日付が重なりにくくなります
+                )
             )
             st.plotly_chart(fig, use_container_width=True)
 
