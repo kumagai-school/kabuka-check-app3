@@ -78,11 +78,12 @@ if code:
     except Exception as e:
         st.error(f"データ取得中にエラーが発生しました: {e}")
 
+
 if code.strip():  # 入力がある場合、自動で表示
     with st.spinner("データを取得中..."):
         try:
             # 高値・安値の取得
-            resp = requests.get(f"{API_URL}/api/highlow", params={"code": code})
+            resp = requests.get(f"API_URL", params={"code": code})
             data = resp.json()
 
             if "error" in data:
@@ -94,7 +95,7 @@ if code.strip():  # 入力がある場合、自動で表示
                 st.write(f"**安値：** {data['low']}（{data['low_date']}）")
 
                 # チャートデータの取得と表示
-                chart_resp = requests.get(f"{API_URL}/api/candle", params={"code": code})
+                chart_resp = requests.get(f"API_URL", params={"code": code})
                 chart_data = chart_resp.json().get("data", [])
 
                 if not chart_data:
