@@ -3,7 +3,7 @@ import requests
 import math
 
 # 外部APIのURL（Cloudflare Tunnel 経由）
-HIGHLOW_API = "https://mostly-finance-population-lb.trycloudflare.com/api/highlow"
+HIGHLOW_API = "https://app.kumagai-stock.com/api/highlow"
 
 # ページ設定
 st.set_page_config(page_title="ルール1 株価チェック", layout="centered")
@@ -94,7 +94,7 @@ st.markdown("---")
 if code.strip():  # 入力がある場合、自動で表示
     with st.spinner("データを取得中..."):
         try:
-          candle_url = "https://mostly-finance-population-lb.trycloudflare.com/api/candle"
+          candle_url = "https://app.kumagai-stock.com/api/candle"
           resp = requests.get(candle_url, params={"code": code})
           chart_data = resp.json().get("data", [])
 
