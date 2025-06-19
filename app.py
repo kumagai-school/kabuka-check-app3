@@ -174,8 +174,15 @@ if recent_high and recent_low:
             st.warning("高値＞安値 の数値を正しく入力してください。")
 
 st.markdown("""
-<div style='text-align: center; color: gray; font-size: 14px; font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;'>
-© 2025 KumagaiNext All rights reserved.
+<div style='
+    text-align: center;
+    color: gray;
+    font-size: 14px;
+    font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif !important;
+    letter-spacing: 0.5px;
+    unicode-bidi: plaintext;
+'>
+&copy; 2025 KumagaiNext All rights reserved.
 </div>
 """, unsafe_allow_html=True)
 
