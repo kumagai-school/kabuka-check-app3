@@ -40,7 +40,13 @@ st.markdown("""
 st.markdown("---")
 
 st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
-code = st.text_input("企業コード（半角英数字のみ、例: 7203）", "7203")
+
+# 追加：
+query_params = st.experimental_get_query_params()
+default_code = query_params.get("code", ["7203"])[0]  # デフォルトは7203
+
+# 修正：
+code = st.text_input("企業コード（半角英数字のみ、例: 7203）", default_code)
 
 recent_high = None
 recent_low = None
