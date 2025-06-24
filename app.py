@@ -42,8 +42,8 @@ st.markdown("---")
 st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
 
 # 追加：
-query = st.query_params
-default_code = query["code"][0] if "code" in query else "7203"
+params = st.query_params
+default_code = params["code"][0] if "code" in params else "7203"
 
 # 修正：
 code = st.text_input("企業コード（半角英数字のみ、例: 7203）", default_code)
