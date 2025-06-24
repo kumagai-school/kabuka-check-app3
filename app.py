@@ -43,10 +43,29 @@ st.caption("ルール１に該当する企業コードをこちらにご入力�
 
 # 追加：
 params = st.query_params
-default_code = params["code"][0] if "code" in params else "7203"
+default_code = str(params.get("code", ["7203"])[0])  # 例: "3370"
 
 # 修正：
-code = st.text_input("企業コード（半角英数字のみ、例: 7203）", default_code)
+code = st.text_input("企業コード（半角英数字のみ、例: 7203）", value=default_code)
+
+if code:
+    url = f"https://app.kumagai-stock.com/api/candle/{code}"
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        # データ整形と表示（簡易版）
+        st.subheader(f"📊 {code} の過去データ")
+        st.write(data)
+
+    except requests.exceptions.RequestException as e:
+        try:
+            err_msg = response.json().get("error", "")
+            st.error(f"APIエラー: {response.status_code} - {err_msg}")
+        except:
+            st.error(f"APIリクエストエラー: {e}")
+
 
 recent_high = None
 recent_low = None
