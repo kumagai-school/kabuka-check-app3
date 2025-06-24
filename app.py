@@ -41,12 +41,20 @@ st.markdown("---")
 
 st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
 
-# 追加：
-params = st.query_params
-default_code = str(params.get("code", ["7203"])[0])  # 例: "3370"
+# ✅ クエリパラメータを安全に取得
+query_code = st.query_params.get("code", ["7203"])[0]
+if not isinstance(query_code, str):
+    query_code = str(query_code)
 
-# 修正：
-code = st.text_input("企業コード（半角英数字のみ、例: 7203）", value=default_code)
+# ✅ 状態変数で value を保持（初期値として設定）
+if "code" not in st.session_state:
+    st.session_state.code = query_code
+
+# 🔲 入力欄にセッション変数を使う
+code = st.text_input("企業コード（半角英数字のみ、例: 7203）", value=st.session_state.code)
+
+# ✅ セッションも更新（再アクセスでも反映されるように）
+st.session_state.code = code
 
 if code:
     url = f"https://app.kumagai-stock.com/api/candle/{code}"
@@ -55,13 +63,13 @@ if code:
         response.raise_for_status()
         data = response.json()
 
-        # データ整形と表示（簡易版）
         st.subheader(f"📊 {code} の過去データ")
         st.write(data)
 
     except requests.exceptions.RequestException as e:
         try:
             err_msg = response.json().get("error", "")
+            st.error(f"APIリクエストエラー: {e}")
             st.error(f"APIエラー: {response.status_code} - {err_msg}")
         except:
             st.error(f"APIリクエストエラー: {e}")
