@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import math
+import pandas as pd
 
 # 外部APIのURL（Cloudflare Tunnel 経由）
 HIGHLOW_API = "https://app.kumagai-stock.com/api/highlow"
@@ -41,38 +42,40 @@ st.markdown("---")
 
 st.caption("ルール１に該当する企業コードをこちらにご入力ください。")
 
-# ✅ クエリパラメータを安全に取得
-query_code = st.query_params.get("code", ["7203"])[0]
-if not isinstance(query_code, str):
-    query_code = str(query_code)
+# --- URLパラメータ処理 ---
+query_code = st.query_params.get("code", "")
+if isinstance(query_code, list):
+    query_code = query_code[0]  # リストなら1つだけ取り出す
+default_code = query_code if query_code else "7203"
 
-# ✅ 状態変数で value を保持（初期値として設定）
-if "code" not in st.session_state:
-    st.session_state.code = query_code
+# --- 企業コードの入力 ---
+code = st.text_input("企業コード（半角英数字のみ、例: 7203）", value=default_code)
 
-# 🔲 入力欄にセッション変数を使う
-code = st.text_input("企業コード（半角英数字のみ、例: 7203）", value=st.session_state.code)
+# 入力値のバリデーション（例：4桁の数字 or アルファベット混じりOK）
+if not code or not code.isalnum():
+    st.warning("正しい企業コードを入力してください（例：7203）")
+    st.stop()
 
-# ✅ セッションも更新（再アクセスでも反映されるように）
-st.session_state.code = code
-
-if code:
-    url = f"https://app.kumagai-stock.com/api/candle/{code}"
+# --- API呼び出し ---
+def get_highlow_data(code):
     try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+        url = f"https://app.kumagai-stock.com/api/highlow/{code}"
+        res = requests.get(url, timeout=10)
+        res.raise_for_status()
+        return res.json()
+    except requests.RequestException as e:
+        st.error(f"APIリクエストエラー：{e}")
+        return None
 
-        st.subheader(f"📊 {code} の過去データ")
-        st.write(data)
-
-    except requests.exceptions.RequestException as e:
-        try:
-            err_msg = response.json().get("error", "")
-            st.error(f"APIリクエストエラー: {e}")
-            st.error(f"APIエラー: {response.status_code} - {err_msg}")
-        except:
-            st.error(f"APIリクエストエラー: {e}")
+def get_candle_data(code):
+    try:
+        url = f"https://app.kumagai-stock.com/api/candle/{code}"
+        res = requests.get(url, timeout=10)
+        res.raise_for_status()
+        return res.json()
+    except requests.RequestException as e:
+        st.error(f"APIリクエストエラー：{e}")
+        return None
 
 
 recent_high = None
